@@ -7,7 +7,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native'; // Importação do hook de navegação
+import { useNavigation } from '@react-navigation/native';
 import { style } from "./style";
 import Logo from '../../assets/Logo_desenho.png';
 
@@ -15,16 +15,19 @@ import Logo from '../../assets/Logo_desenho.png';
 import { MaterialIcons } from '@expo/vector-icons';
 import { themas } from "../../global/themes";
 
-export default function Login() {
-    const navigation = useNavigation<any>(); // Inicialização da navegação
-
+export default function ResetPassword() {
+    const navigation = useNavigation<any>();
+    
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    
     const [showPassword, setShowPassword] = useState(true);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(true);
 
     return (
         <View style={style.container}>
-            {/* Bloco Superior: Logo e Boas-vindas */}
+            {/* Bloco Superior */}
             <View style={style.boxTop}>
                 <View style={{ alignItems: 'center' }}>
                     <Image
@@ -32,13 +35,13 @@ export default function Login() {
                         style={style.logo}
                         resizeMode="contain"
                     />
-                    <Text style={style.text}>Bem vindo de volta!</Text>
+                    <Text style={style.text}>Redefinir Senha</Text>
                 </View>
             </View>
 
-            {/* Bloco Central: Inputs e Esqueci a Senha */}
+            {/* Bloco Central - Formulário com 3 campos */}
             <View style={style.boxMid}>
-                <Text style={style.titleInput}>ENDEREÇO DE E-MAIL</Text>
+                <Text style={style.titleInput}>CONFIRME SEU E-MAIL</Text>
                 <View style={style.boxInput}>
                     <TextInput
                         style={style.input}
@@ -51,12 +54,12 @@ export default function Login() {
                     <MaterialIcons name='email' size={20} color={themas.colors.gray} />
                 </View>
 
-                <Text style={style.titleInput}>SENHA</Text>
+                <Text style={style.titleInput}>NOVA SENHA</Text>
                 <View style={style.boxInput}>
                     <TextInput
                         style={style.input}
-                        value={password}
-                        onChangeText={setPassword}
+                        value={newPassword}
+                        onChangeText={setNewPassword}
                         secureTextEntry={showPassword}
                     />
                     <TouchableOpacity 
@@ -71,30 +74,39 @@ export default function Login() {
                     </TouchableOpacity>
                 </View>
 
-                {/* Link Esqueci minha senha - Direciona para a tela ResetPassword */}
-                <TouchableOpacity 
-                    style={style.forgotPasswordContainer} 
-                    activeOpacity={0.6}
-                    onPress={() => navigation.navigate('ResetPassword')}
-                >
-                    <Text style={style.textForgotPassword}>Esqueci minha senha</Text>
-                </TouchableOpacity>
+                <Text style={style.titleInput}>CONFIRMAR NOVA SENHA</Text>
+                <View style={style.boxInput}>
+                    <TextInput
+                        style={style.input}
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry={showConfirmPassword}
+                    />
+                    <TouchableOpacity 
+                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                        activeOpacity={0.7}
+                    >
+                        <MaterialIcons 
+                            name={showConfirmPassword ? 'visibility-off' : 'remove-red-eye'} 
+                            size={20} 
+                            color={themas.colors.gray} 
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
 
-            {/* Bloco Inferior: Botão de Entrar e Link de Cadastro */}
+            {/* Bloco Inferior */}
             <View style={style.boxBottom}>
                 <TouchableOpacity style={style.button} activeOpacity={0.8}>
-                    <Text style={style.textButton}>Entrar</Text>
+                    <Text style={style.textButton}>Alterar Senha</Text>
                 </TouchableOpacity>
 
-                {/* Container estruturado em linha para o texto e o botão animado */}
                 <View style={style.boxBottomText}>
-                    <Text style={style.textBottom}>Não tem conta? </Text>
                     <TouchableOpacity 
                         activeOpacity={0.6} 
-                        onPress={() => navigation.navigate('Register')}
+                        onPress={() => navigation.goBack()}
                     >
-                        <Text style={style.textCreateNow}>Crie agora!</Text>
+                        <Text style={style.textBackLogin}>Voltar para o Login</Text>
                     </TouchableOpacity>
                 </View>
             </View>
