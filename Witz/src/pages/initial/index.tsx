@@ -22,7 +22,6 @@ export default function Initial() {
                 </View>
 
                 <View style={style.boxBottom}>
-                    {/* ADICIONE O ONS PRESS AQUI */}
                     <TouchableOpacity 
                         style={style.button} 
                         activeOpacity={0.7}

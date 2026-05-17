@@ -7,16 +7,15 @@ import {
     TouchableOpacity
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native'; // Importação do hook de navegação
+import { useNavigation } from '@react-navigation/native';
 import { style } from "./style";
 import Logo from '../../assets/Logo_desenho.png';
-
 // @ts-ignore
 import { MaterialIcons } from '@expo/vector-icons';
 import { themas } from "../../global/themes";
 
 export default function Login() {
-    const navigation = useNavigation<any>(); // Inicialização da navegação
+    const navigation = useNavigation<any>();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -24,7 +23,6 @@ export default function Login() {
 
     return (
         <View style={style.container}>
-            {/* Bloco Superior: Logo e Boas-vindas */}
             <View style={style.boxTop}>
                 <View style={{ alignItems: 'center' }}>
                     <Image
@@ -35,8 +33,6 @@ export default function Login() {
                     <Text style={style.text}>Bem vindo de volta!</Text>
                 </View>
             </View>
-
-            {/* Bloco Central: Inputs e Esqueci a Senha */}
             <View style={style.boxMid}>
                 <Text style={style.titleInput}>ENDEREÇO DE E-MAIL</Text>
                 <View style={style.boxInput}>
@@ -70,8 +66,6 @@ export default function Login() {
                         />
                     </TouchableOpacity>
                 </View>
-
-                {/* Link Esqueci minha senha - Direciona para a tela ResetPassword */}
                 <TouchableOpacity 
                     style={style.forgotPasswordContainer} 
                     activeOpacity={0.6}
@@ -80,14 +74,10 @@ export default function Login() {
                     <Text style={style.textForgotPassword}>Esqueci minha senha</Text>
                 </TouchableOpacity>
             </View>
-
-            {/* Bloco Inferior: Botão de Entrar e Link de Cadastro */}
             <View style={style.boxBottom}>
                 <TouchableOpacity style={style.button} activeOpacity={0.8}>
                     <Text style={style.textButton}>Entrar</Text>
                 </TouchableOpacity>
-
-                {/* Container estruturado em linha para o texto e o botão animado */}
                 <View style={style.boxBottomText}>
                     <Text style={style.textBottom}>Não tem conta? </Text>
                     <TouchableOpacity 

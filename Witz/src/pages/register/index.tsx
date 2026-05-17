@@ -9,7 +9,6 @@ import {
 
 import { style } from "./style";
 import Logo from '../../assets/Logo_desenho.png';
-
 // @ts-ignore
 import { MaterialIcons } from '@expo/vector-icons';
 import { themas } from "../../global/themes";
@@ -28,7 +27,6 @@ export default function Register() {
 
     return (
         <View style={style.container}>
-            {/* Bloco Superior */}
             <View style={style.boxTop}>
                 <View style={{ alignItems: 'center' }}>
                     <Image
@@ -39,8 +37,6 @@ export default function Register() {
                     <Text style={style.text}>Crie sua conta</Text>
                 </View>
             </View>
-
-            {/* Bloco Central */}
             <View style={style.boxMid}>
                 <Text style={style.titleInput}>NOME COMPLETO</Text>
                 <View style={style.boxInput}>
@@ -113,8 +109,6 @@ export default function Register() {
                 <TouchableOpacity style={style.button} activeOpacity={0.8}>
                     <Text style={style.textButton}>Cadastrar</Text>
                 </TouchableOpacity>
-
-                {/* Link para voltar ao Login com animação TouchableOpacity */}
                 <View style={style.boxBottomText}>
                     <Text style={style.textBottom}>Já tem uma conta? </Text>
                     <TouchableOpacity 

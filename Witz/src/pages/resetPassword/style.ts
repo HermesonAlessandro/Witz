@@ -28,7 +28,7 @@ export const style = StyleSheet.create({
         paddingTop: 40
     },
     logo: {
-        width: 300,
+        width: 400,
         height: 300,
         transform: [{ translateY: 20 }] 
     },

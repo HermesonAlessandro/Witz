@@ -11,39 +11,39 @@ export const style = StyleSheet.create({
         backgroundColor: '#ffffff'
     },
     boxTop: {
-        height: height / 4,
+        height: height / 3.8,
         width: '100%',
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingTop: 20
+        justifyContent: 'flex-end',
+        paddingBottom: 10
     },
     boxMid: {
         width: '100%',
         paddingHorizontal: 37,
+        marginTop: -10
     },
     boxBottom: {
         height: height / 4,
         width: '100%',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop: 25
+        paddingTop: 35
     },
     logo: {
-        width: 200,
-        height: 200,
-        transform: [{ translateY: 30 }] 
+        width: 400,
+        height: 300,
     },
     text: {
         fontWeight: 'bold',
         fontSize: 28,
         color: '#000',
-        marginTop: 5,
-        transform: [{ translateY: -30 }]
+        marginTop: -60,
+        textAlign: 'center'
     },
     titleInput: {
         marginLeft: 5,
         color: themas.colors.gray,
-        marginTop: 15,
+        marginTop: 14,
         fontSize: 13
     },
     boxInput: {
@@ -51,7 +51,7 @@ export const style = StyleSheet.create({
         height: 45,
         borderWidth: 1,
         borderRadius: 40,
-        marginTop: 8,
+        marginTop: 6,
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 15,
@@ -70,7 +70,11 @@ export const style = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: themas.colors.primary,
         borderRadius: 40,
-        elevation: 5
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
     },
     textButton: {
         fontSize: 16,

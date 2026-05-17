@@ -10,7 +10,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { style } from "./style";
 import Logo from '../../assets/Logo_desenho.png';
-
 // @ts-ignore
 import { MaterialIcons } from '@expo/vector-icons';
 import { themas } from "../../global/themes";
@@ -27,7 +26,6 @@ export default function ResetPassword() {
 
     return (
         <View style={style.container}>
-            {/* Bloco Superior */}
             <View style={style.boxTop}>
                 <View style={{ alignItems: 'center' }}>
                     <Image
@@ -38,8 +36,6 @@ export default function ResetPassword() {
                     <Text style={style.text}>Redefinir Senha</Text>
                 </View>
             </View>
-
-            {/* Bloco Central - Formulário com 3 campos */}
             <View style={style.boxMid}>
                 <Text style={style.titleInput}>CONFIRME SEU E-MAIL</Text>
                 <View style={style.boxInput}>
@@ -94,8 +90,6 @@ export default function ResetPassword() {
                     </TouchableOpacity>
                 </View>
             </View>
-
-            {/* Bloco Inferior */}
             <View style={style.boxBottom}>
                 <TouchableOpacity style={style.button} activeOpacity={0.8}>
                     <Text style={style.textButton}>Alterar Senha</Text>
