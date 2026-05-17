@@ -6,7 +6,7 @@ import {
     TextInput,
     TouchableOpacity,
     Alert,
-    ActivityIndicator // Componente para mostrar a bolinha de carregamento
+    ActivityIndicator
 } from 'react-native';
 
 import { style } from "./style";
@@ -15,8 +15,6 @@ import Logo from '../../assets/Logo_desenho.png';
 import { MaterialIcons } from '@expo/vector-icons';
 import { themas } from "../../global/themes";
 import { useNavigation } from '@react-navigation/native';
-
-// 1. IMPORTAÇÕES DO FIREBASE (Ligando com a sua configuração)
 import { auth, db } from "../../services/firebaseconfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -31,36 +29,29 @@ export default function Register() {
     
     const [showPassword, setShowPassword] = useState(true);
     const [showConfirmPassword, setShowConfirmPassword] = useState(true);
-    const [loading, setLoading] = useState(false); // Estado para controlar o carregamento
+    const [loading, setLoading] = useState(false);
 
-    // 2. FUNÇÃO QUE DISPARA O CADASTRO E SALVA NO BANCO (CRUD)
     const handleRegister = async () => {
-        // Validação de campos vazios
         if (!name.trim() || !email.trim() || !password || !confirmPassword) {
             Alert.alert("Atenção", "Por favor, preencha todos os campos.");
             return;
         }
 
-        // Validação de senhas iguais
         if (password !== confirmPassword) {
             Alert.alert("Erro", "As senhas não coincidem.");
             return;
         }
 
-        // Exigência mínima do Firebase
         if (password.length < 6) {
             Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres.");
             return;
         }
 
-        setLoading(true); // Ativa o carregamento no botão
+        setLoading(true);
 
         try {
-            // Criando o usuário no Authentication
             const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
             const user = userCredential.user;
-
-            // Gravando os dados extras do usuário no Firestore (Início do seu CRUD)
             await setDoc(doc(db, "usuarios", user.uid), {
                 nome: name.trim(),
                 email: email.trim().toLowerCase(),
@@ -81,7 +72,7 @@ export default function Register() {
                 Alert.alert("Erro", "Não foi possível realizar o cadastro. Tente novamente.");
             }
         } finally {
-            setLoading(false); // Desativa o carregamento
+            setLoading(false);
         }
     };
 
@@ -163,10 +154,7 @@ export default function Register() {
                     </TouchableOpacity>
                 </View>
             </View>
-
-            {/* Bloco Inferior */}
             <View style={style.boxBottom}>
-                {/* 3. AQUI FOI ADICIONADO O ONPRESS E O LOADING ANTES INEXISTENTES */}
                 <TouchableOpacity 
                     style={style.button} 
                     activeOpacity={0.8}
