@@ -1,5 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import Main_screen from '../pages/main_screen';
 import Initial from '../pages/initial';
 import Login from '../pages/login';
 import Register from '../pages/register';
@@ -10,6 +11,7 @@ const Stack = createStackNavigator();
 export default function Routes() {
   return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="main_screen" component={Main_screen} />
           <Stack.Screen name="Initial" component={Initial} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} /> 
