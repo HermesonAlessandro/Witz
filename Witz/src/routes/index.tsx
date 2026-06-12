@@ -10,12 +10,13 @@ const Stack = createStackNavigator();
 
 export default function Routes() {
   return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="main_screen" component={Main_screen} />
-          <Stack.Screen name="Initial" component={Initial} />
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Register" component={Register} /> 
-          <Stack.Screen name="ResetPassword" component={ResetPassword} />
-      </Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      
+      <Stack.Screen name="main_screen" component={Main_screen} />
+      <Stack.Screen name="Initial" component={Initial} />
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="ResetPassword" component={ResetPassword} />
+    </Stack.Navigator>
   );
 }
