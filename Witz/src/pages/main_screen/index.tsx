@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Text,
   View,
@@ -11,15 +11,19 @@ import {
   ScrollView
 } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
 
 import { style } from "./style";
 import logo from '../../assets/Logo_desenho.png';
 // @ts-ignore
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useMetas } from '../goals/MetasContext';
 
 const Tab = createBottomTabNavigator();
 
 function TelaPrincipal() {
+  const { setSaldoAtual } = useMetas();
+
   const [transacoes, setTransacoes] = useState([
     { id: '1', titulo: 'Salário',  tipo: 'entrada', valor: 1000, data: '2026-05-20' },
     { id: '2', titulo: 'Freela',   tipo: 'entrada', valor: 250,  data: '2026-05-22' },
@@ -49,9 +53,19 @@ function TelaPrincipal() {
       else if (dias > 30) titulo = "Constante";
       else if (dias > 7)  titulo = "Iniciado";
 
-      return { totalEntradas: entradas, totalSaidas: saidas, saldoAtual: entradas - saidas,
-               diasStreak: dias, tituloStreak: titulo, teveGastoHoje: gastoHoje };
+      return {
+        totalEntradas: entradas,
+        totalSaidas: saidas,
+        saldoAtual: entradas - saidas,
+        diasStreak: dias,
+        tituloStreak: titulo,
+        teveGastoHoje: gastoHoje
+      };
     }, [transacoes, streakBase]);
+
+  useEffect(() => {
+    setSaldoAtual(saldoAtual);
+  }, [saldoAtual]);
 
   function adicionarTransacao() {
     const valor = parseFloat(valorInput.replace(',', '.'));
@@ -80,7 +94,6 @@ function TelaPrincipal() {
   };
 
   return (
-    // ✅ Trocado SafeAreaView por View — SafeAreaProvider no App.tsx já cuida disso
     <View style={style.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
@@ -136,7 +149,7 @@ function TelaPrincipal() {
           <View style={style.mainRow}>
             <View>
               <Text style={[style.streakNumber, teveGastoHoje && style.streakQuebradoColor]}>{diasStreak}</Text>
-              <Text style={[style.streakText,   teveGastoHoje && style.streakQuebradoColor]}>dias</Text>
+              <Text style={[style.streakText, teveGastoHoje && style.streakQuebradoColor]}>dias</Text>
             </View>
             <View style={style.fireGroup}>
               <View style={style.fireRow}>
@@ -223,6 +236,28 @@ function TelaPrincipal() {
   );
 }
 
+// ✅ BotaoMetas usa navigation do Stack via dangerouslyGetParent
+function BotaoMetas({ children, style: tabStyle }: any) {
+  const navigation = useNavigation<any>();
+
+  return (
+    <TouchableOpacity
+      style={tabStyle}
+      onPress={() => {
+        // Sobe para o Stack Navigator pai e navega para goals
+        const stackNav = navigation.getParent();
+        if (stackNav) {
+          stackNav.navigate('goals');
+        } else {
+          navigation.navigate('goals');
+        }
+      }}
+    >
+      {children}
+    </TouchableOpacity>
+  );
+}
+
 export default function TelaPrincipalComNav() {
   return (
     <Tab.Navigator
@@ -234,7 +269,7 @@ export default function TelaPrincipalComNav() {
           backgroundColor: '#FFF',
           height: 70,
           borderTopWidth: 0,
-          paddingBottom: 90,
+          paddingBottom: 10,
           paddingTop: 5,
         },
       }}
@@ -261,6 +296,7 @@ export default function TelaPrincipalComNav() {
         name="Metas"
         component={TelaPrincipal}
         options={{
+          tabBarButton: (props) => <BotaoMetas {...props} />,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? "disc" : "disc-outline"} size={size} color={color} />
           ),
