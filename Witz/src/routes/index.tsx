@@ -2,6 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// @ts-ignore
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Telas
@@ -10,14 +12,36 @@ import Initial from '../pages/initial';
 import Login from '../pages/login';
 import Register from '../pages/register';
 import ResetPassword from '../pages/resetPassword';
+// IMPORTANTE: Nome da variável de importação DEVE começar com letra Maiúscula
+import PrincpTransitionScreen from '../pages/princp_transition_Screen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 /* -----------------------------
+   Wrapper para a Tela de Transações
+   (Resolve o erro do TypeScript exigindo onTrocar)
+------------------------------*/
+function TransacoesWrapper(props: any) {
+  return (
+    // Agora o React sabe que isso é um componente customizado
+    <PrincpTransitionScreen
+      {...props}
+      onTrocar={(tipo: string) => {
+        // Se no futuro você quiser que o menu navegue para outras telas, 
+        // substitua o console.log por: props.navigation.navigate('NomeDaSuaTela');
+        console.log("O usuário escolheu a opção:", tipo);
+      }}
+    />
+  );
+}
+
+/* -----------------------------
    Barra de navegação inferior
 ------------------------------*/
 function BottomTabs() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -26,9 +50,12 @@ function BottomTabs() {
         tabBarInactiveTintColor: '#8A8A8A',
         tabBarStyle: {
           backgroundColor: '#FFF',
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
+          paddingTop: 5,
           borderTopWidth: 0,
+          elevation: 10,
+          shadowOpacity: 0.08,
         },
       }}
     >
@@ -46,9 +73,10 @@ function BottomTabs() {
         }}
       />
 
+      {/* Usamos o Wrapper aqui em vez da tela direta para passar as Props */}
       <Tab.Screen
         name="Transações"
-        component={MainScreen}
+        component={TransacoesWrapper}
         options={{
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
