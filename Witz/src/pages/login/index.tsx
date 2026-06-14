@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
     Text,
     View,
@@ -16,49 +16,127 @@ import Logo from '../../assets/Logo_desenho.png';
 import { MaterialIcons } from '@expo/vector-icons';
 import { themas } from "../../global/themes";
 
-// Importações do Firebase adicionadas
-import { auth } from "../../services/firebaseconfig"; 
-import { signInWithEmailAndPassword } from "firebase/auth";
+// Importações do Firebase e Recaptcha
+import { auth, db, app } from "../../services/firebaseconfig";
+import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 
-export default function Login() {
+export default function AuthScreen() {
     const navigation = useNavigation<any>();
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(true);
     
-    // Novo estado para controlar o carregamento do botão
-    const [loading, setLoading] = useState(false);
+    // CORREÇÃO 1: Adicionado <any> para tipar a referência corretamente
+    const recaptchaVerifier = useRef<any>(null);
 
-    // Função responsável por autenticar o usuário
-    const handleLogin = async () => {
-        if (!email.trim() || !password) {
-            Alert.alert("Atenção", "Por favor, preencha todos os campos.");
+    // Controle de qual etapa da tela estamos (1: Telefone, 2: Código SMS, 3: Nome)
+    const [step, setStep] = useState(1);
+    
+    // Estados dos inputs
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [verificationId, setVerificationId] = useState('');
+    const [verificationCode, setVerificationCode] = useState('');
+    const [name, setName] = useState('');
+    
+    // Estados de controle
+    const [loading, setLoading] = useState(false);
+    const [uid, setUid] = useState(''); // Guarda o ID do usuário se precisar criar o perfil
+
+    // ETAPA 1: Enviar o SMS
+    const handleSendSMS = async () => {
+        let numeroFormatado = phoneNumber.trim();
+        if (!numeroFormatado.startsWith('+55')) {
+            numeroFormatado = `+55${numeroFormatado}`;
+        }
+
+        if (numeroFormatado.length < 13) {
+            Alert.alert("Atenção", "Digite um número válido com DDD. Ex: 85999998888");
+            return;
+        }
+
+        // CORREÇÃO 2: Verificação de segurança adicionada
+        if (!recaptchaVerifier.current) {
+            Alert.alert("Aguarde", "O sistema de segurança está carregando. Tente novamente em um segundo.");
             return;
         }
 
         setLoading(true);
-
         try {
-            await signInWithEmailAndPassword(auth, email.trim(), password);
+            const phoneProvider = new PhoneAuthProvider(auth);
             
-            // Redireciona para a tela principal e limpa o histórico de navegação
-            // Certifique-se de que 'MainScreen' é o nome exato da rota definida no seu App.tsx/Routes
+            // CORREÇÃO 3: Forçando o tipo "as any" para evitar conflito com o Firebase SDK
+            const id = await phoneProvider.verifyPhoneNumber(
+                numeroFormatado,
+                recaptchaVerifier.current as any 
+            );
+            
+            setVerificationId(id);
+            setStep(2); // Vai para a tela de digitar o código
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Erro", "Não foi possível enviar o SMS. Verifique o número e tente novamente.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ETAPA 2: Verificar o Código e checar o Banco de Dados
+    const handleVerifyCode = async () => {
+        if (verificationCode.length < 6) {
+            Alert.alert("Atenção", "O código deve ter pelo menos 6 dígitos.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
+            const userCredential = await signInWithCredential(auth, credential);
+            const user = userCredential.user;
+
+            // Checa se o usuário já tem um documento salvo no Firestore
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+
+            if (userDoc.exists()) {
+                // Usuário já cadastrado! Vai direto pra tela principal
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'MainScreen' }], 
+                });
+            } else {
+                // Usuário novo! Guarda o UID e vai para a etapa de pedir o nome
+                setUid(user.uid);
+                setStep(3); 
+            }
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Erro", "Código de verificação inválido ou expirado.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ETAPA 3: Salvar o Nome do novo usuário no Banco
+    const handleSaveProfile = async () => {
+        if (!name.trim()) {
+            Alert.alert("Atenção", "Por favor, digite seu nome completo.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await setDoc(doc(db, "usuarios", uid), {
+                nome: name.trim(),
+                telefone: phoneNumber.trim(), // Salva o telefone que ele usou para logar
+                createdAt: new Date()
+            });
+
+            // Perfil criado com sucesso, vai pra tela principal!
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'MainScreen' }], 
             });
-
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            // Tratamento de erros comuns do Firebase Auth
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                Alert.alert("Erro", "E-mail ou senha incorretos.");
-            } else if (error.code === 'auth/invalid-email') {
-                Alert.alert("Erro", "O formato do e-mail é inválido.");
-            } else {
-                Alert.alert("Erro", "Não foi possível fazer o login. Tente novamente mais tarde.");
-            }
+            Alert.alert("Erro", "Não foi possível salvar seu perfil. Tente novamente.");
         } finally {
             setLoading(false);
         }
@@ -66,83 +144,107 @@ export default function Login() {
 
     return (
         <View style={style.container}>
+            {/* Modal invisível obrigatório para o envio de SMS */}
+            <FirebaseRecaptchaVerifierModal
+                ref={recaptchaVerifier}
+                firebaseConfig={app.options}
+                attemptInvisibleVerification={true}
+            />
+
             <View style={style.boxTop}>
                 <View style={{ alignItems: 'center' }}>
-                    <Image
-                        source={Logo}
-                        style={style.logo}
-                        resizeMode="contain"
-                    />
-                    <Text style={style.text}>Bem vindo de volta!</Text>
+                    <Image source={Logo} style={style.logo} resizeMode="contain" />
+                    <Text style={style.text}>
+                        {step === 1 && "Acessar Conta"}
+                        {step === 2 && "Digite o Código"}
+                        {step === 3 && "Complete seu Cadastro"}
+                    </Text>
                 </View>
             </View>
             
             <View style={style.boxMid}>
-                <Text style={style.titleInput}>ENDEREÇO DE E-MAIL</Text>
-                <View style={style.boxInput}>
-                    <TextInput
-                        style={style.input}
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        placeholder="exemplo@email.com"
-                    />
-                    <MaterialIcons name='email' size={20} color={themas.colors.gray} />
-                </View>
+                {step === 1 && (
+                    <>
+                        <Text style={style.titleInput}>SEU CELULAR (COM DDD)</Text>
+                        <View style={style.boxInput}>
+                            <TextInput
+                                style={style.input}
+                                value={phoneNumber}
+                                onChangeText={setPhoneNumber}
+                                keyboardType="phone-pad"
+                                placeholder="Ex: 85999998888"
+                            />
+                            <MaterialIcons name='phone-android' size={20} color={themas.colors.gray} />
+                        </View>
+                        <Text style={{ color: themas.colors.gray, marginTop: 10, fontSize: 12, textAlign: 'center' }}>
+                            Você receberá um SMS de verificação. Não precisamos de senha!
+                        </Text>
+                    </>
+                )}
 
-                <Text style={style.titleInput}>SENHA</Text>
-                <View style={style.boxInput}>
-                    <TextInput
-                        style={style.input}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry={showPassword}
-                    />
-                    <TouchableOpacity 
-                        onPress={() => setShowPassword(!showPassword)}
-                        activeOpacity={0.7}
-                    >
-                        <MaterialIcons 
-                            name={showPassword ? 'visibility-off' : 'remove-red-eye'} 
-                            size={20} 
-                            color={themas.colors.gray} 
-                        />
-                    </TouchableOpacity>
-                </View>
-                <TouchableOpacity 
-                    style={style.forgotPasswordContainer} 
-                    activeOpacity={0.6}
-                    onPress={() => navigation.navigate('ResetPassword')}
-                >
-                    <Text style={style.textForgotPassword}>Esqueci minha senha</Text>
-                </TouchableOpacity>
+                {step === 2 && (
+                    <>
+                        <Text style={style.titleInput}>CÓDIGO RECEBIDO POR SMS</Text>
+                        <View style={style.boxInput}>
+                            <TextInput
+                                style={style.input}
+                                value={verificationCode}
+                                onChangeText={setVerificationCode}
+                                keyboardType="number-pad"
+                                maxLength={6}
+                                placeholder="000000"
+                            />
+                            <MaterialIcons name='lock-outline' size={20} color={themas.colors.gray} />
+                        </View>
+                        <TouchableOpacity 
+                            style={{ marginTop: 15, alignItems: 'center' }}
+                            onPress={() => setStep(1)} 
+                        >
+                            <Text style={{ color: themas.colors.primary, fontWeight: 'bold' }}>
+                                Digitei o número errado
+                            </Text>
+                        </TouchableOpacity>
+                    </>
+                )}
+
+                {step === 3 && (
+                    <>
+                        <Text style={style.titleInput}>NOME COMPLETO</Text>
+                        <View style={style.boxInput}>
+                            <TextInput
+                                style={style.input}
+                                value={name}
+                                onChangeText={setName}
+                                autoCapitalize="words"
+                                placeholder="Como devemos te chamar?"
+                            />
+                            <MaterialIcons name='person' size={20} color={themas.colors.gray} />
+                        </View>
+                    </>
+                )}
             </View>
             
             <View style={style.boxBottom}>
-                {/* Botão de Entrar atualizado com a função onPress e ActivityIndicator */}
                 <TouchableOpacity 
                     style={style.button} 
                     activeOpacity={0.8}
-                    onPress={handleLogin}
+                    onPress={
+                        step === 1 ? handleSendSMS : 
+                        step === 2 ? handleVerifyCode : 
+                        handleSaveProfile
+                    }
                     disabled={loading}
                 >
                     {loading ? (
                         <ActivityIndicator size="small" color="#ffffff" />
                     ) : (
-                        <Text style={style.textButton}>Entrar</Text>
+                        <Text style={style.textButton}>
+                            {step === 1 && "Receber Código SMS"}
+                            {step === 2 && "Confirmar Acesso"}
+                            {step === 3 && "Finalizar Cadastro"}
+                        </Text>
                     )}
                 </TouchableOpacity>
-                
-                <View style={style.boxBottomText}>
-                    <Text style={style.textBottom}>Não tem conta? </Text>
-                    <TouchableOpacity 
-                        activeOpacity={0.6} 
-                        onPress={() => navigation.navigate('Register')}
-                    >
-                        <Text style={style.textCreateNow}>Crie agora!</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
         </View>
     );

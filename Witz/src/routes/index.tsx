@@ -9,8 +9,6 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 // Telas
 import Initial from '../pages/initial';
 import Login from '../pages/login';
-import Register from '../pages/register';
-import ResetPassword from '../pages/resetPassword';
 import Analysis from '../pages/Analysis';
 import MainScreen from '../pages/main_screen';
 
@@ -158,16 +156,6 @@ export default function Routes() {
         <Stack.Screen
           name="Login"
           component={Login}
-        />
-
-        <Stack.Screen
-          name="Register"
-          component={Register}
-        />
-
-        <Stack.Screen
-          name="ResetPassword"
-          component={ResetPassword}
         />
       </Stack.Navigator>
     </NavigationContainer>
