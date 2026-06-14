@@ -1,176 +1,97 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
-  Modal,
   SafeAreaView,
   FlatList,
-  TextInput,
   ListRenderItem,
+  ActivityIndicator
 } from "react-native";
 // @ts-ignore
 import { Ionicons } from "@expo/vector-icons";
 
+// Importações do Firebase
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { db, auth } from "../../services/firebaseconfig"; 
+
 import styles from "./style";
 
-interface TelaPrincipalProps {
-  onTrocar: (tipo: string) => void;
-}
+export default function PrincpTransitionScreen() {
+  const [transacoes, setTransacoes] = useState<any[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
-interface Transacao {
-  id: string;
-  titulo: string;
-  categoria: string;
-  data: string;
-  valor: string;
-  cor: string;
-  tipo: string;
-}
+  const userId = auth.currentUser?.uid;
 
-export default function TelaPrincipal({ onTrocar }: TelaPrincipalProps) {
-  const [menuAberto, setMenuAberto] = useState(false);
+  // Busca as transações do Firebase em tempo real
+  useEffect(() => {
+    if (!userId) {
+      setCarregando(false);
+      return;
+    }
 
-  const transacoes: Transacao[] = [
-    {
-      id: "1",
-      titulo: "Roupas novas",
-      categoria: "Compras",
-      data: "21 mar",
-      valor: "- R$ 520,00",
-      cor: "#E74C3C",
-      tipo: "despesa",
-    },
-    {
-      id: "2",
-      titulo: "Farmácia",
-      categoria: "Saúde",
-      data: "19 mar",
-      valor: "- R$ 95,00",
-      cor: "#E74C3C",
-      tipo: "despesa",
-    },
-    {
-      id: "3",
-      titulo: "Freelance design",
-      categoria: "Freelance",
-      data: "11 mar",
-      valor: "+ R$ 2.200,00",
-      cor: "#2D8C56",
-      tipo: "receita",
-    },
-  ];
+    const transacoesRef = collection(db, "transacoes");
+    const q = query(transacoesRef, where("userId", "==", userId));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const lista = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Ordena por data (mais recentes primeiro)
+      lista.sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime());
+      
+      setTransacoes(lista);
+      setCarregando(false);
+    });
 
-  const renderItem: ListRenderItem<Transacao> = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => onTrocar(item.tipo)}
-    >
+    return () => unsubscribe();
+  }, [userId]);
+
+  const renderItem: ListRenderItem<any> = ({ item }) => (
+    <View style={styles.card}>
       <View style={styles.iconPlaceholder} />
 
       <View style={styles.infoContainer}>
         <Text style={styles.itemTitulo}>{item.titulo}</Text>
         <Text style={styles.itemSub}>
-          {item.categoria} • {item.data}
+          {item.tipo === 'entrada' ? 'Receita' : 'Despesa'} • {new Date(item.data).toLocaleDateString()}
         </Text>
       </View>
 
-      <Text style={[styles.itemValor, { color: item.cor }]}>
-        {item.valor}
+      <Text style={[styles.itemValor, { color: item.tipo === 'entrada' ? "#2D8C56" : "#E74C3C" }]}>
+        {item.tipo === 'entrada' ? '+' : '-'} R$ {item.valor.toFixed(2)}
       </Text>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* HEADER */}
+      {/* HEADER SIMPLIFICADO */}
       <View style={styles.header}>
         <View>
           <Text style={styles.tituloApp}>Transações</Text>
           <Text style={styles.subtituloApp}>
-            12 transações registradas
+            {transacoes.length} transações registradas
           </Text>
         </View>
-
-        {/* Agora o styles.btnNova existe no style.ts! */}
-        <TouchableOpacity
-          style={styles.btnNova}
-          onPress={() => setMenuAberto(true)}
-        >
-          <Text style={styles.btnNovaText}>+ Nova</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* BUSCA */}
-      <View style={styles.buscaContainer}>
-        <TextInput
-          style={styles.buscaInput}
-          placeholder="Buscar transação..."
-          placeholderTextColor="#999"
-        />
       </View>
 
       {/* LISTA */}
-      <FlatList
-        data={transacoes}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
-
-      {/* MODAL */}
-      <Modal
-        animationType="fade"
-        transparent
-        visible={menuAberto}
-        onRequestClose={() => setMenuAberto(false)}
-      >
-        <View style={styles.overlay}>
-          <View style={styles.menuContainer}>
-            <View style={styles.optionsRow}>
-              
-              <TouchableOpacity
-                style={styles.optionItem}
-                onPress={() => {
-                  setMenuAberto(false);
-                  onTrocar("despesa");
-                }}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: "#FF5252" }]}>
-                  <Ionicons name="trending-down" size={30} color="#FFF" />
-                </View>
-                <Text style={styles.optionText}>Despesa</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.optionItem}
-                onPress={() => {
-                  setMenuAberto(false);
-                  onTrocar("receita");
-                }}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: "#2D8C56" }]}>
-                  <Ionicons name="trending-up" size={30} color="#FFF" />
-                </View>
-                <Text style={styles.optionText}>Receita</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.optionItem}
-                onPress={() => setMenuAberto(false)}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: "#F0F0F0" }]}>
-                  <Ionicons name="close" size={30} color="#333" />
-                </View>
-                <Text style={[styles.optionText, { color: "#999" }]}>
-                  Cancelar
-                </Text>
-              </TouchableOpacity>
-
-            </View>
-          </View>
+      {carregando ? (
+        <ActivityIndicator size="large" color="#888EEF" style={{ marginTop: 50 }} />
+      ) : transacoes.length === 0 ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: '#999' }}>Nenhuma transação encontrada.</Text>
         </View>
-      </Modal>
+      ) : (
+        <FlatList
+          data={transacoes}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}
+        />
+      )}
     </SafeAreaView>
   );
 }

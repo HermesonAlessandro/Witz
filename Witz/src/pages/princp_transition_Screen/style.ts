@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  tituloApp: { fontSize: 28, fontWeight: "bold", color: "#4A90E2" },
+  tituloApp: { fontSize: 28, fontWeight: "bold", color: "#878af6" },
   subtituloApp: { color: "#888", fontSize: 16 },
 
   // Estilo unificado para o botão "+ Nova"
