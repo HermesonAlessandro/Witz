@@ -7,11 +7,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Telas
-import MainScreen from '../pages/main_screen';
 import Initial from '../pages/initial';
 import Login from '../pages/login';
 import Register from '../pages/register';
 import ResetPassword from '../pages/resetPassword';
+import Analysis from '../pages/Analysis';
+import MainScreen from '../pages/main_screen';
+
 // IMPORTANTE: Nome da variável de importação DEVE começar com letra Maiúscula
 import PrincpTransitionScreen from '../pages/princp_transition_Screen';
 
@@ -118,7 +120,7 @@ function BottomTabs() {
 
       <Tab.Screen
         name="Análises"
-        component={MainScreen}
+        component={Analysis}
         options={{
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
@@ -140,7 +142,7 @@ export default function Routes() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="MainScreen"
+        initialRouteName="Initial" // <--- AQUI FOI ALTERADO DE "MainScreen" PARA "Initial"
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen
