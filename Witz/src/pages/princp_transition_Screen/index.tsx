@@ -50,7 +50,7 @@ export default function PrincpTransitionScreen() {
 
   const renderItem: ListRenderItem<any> = ({ item }) => (
     <View style={styles.card}>
-      <View style={styles.iconPlaceholder} />
+      {/* A silhueta (iconPlaceholder) foi removida daqui */}
 
       <View style={styles.infoContainer}>
         <Text style={styles.itemTitulo}>{item.titulo}</Text>
