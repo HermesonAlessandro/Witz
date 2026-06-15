@@ -12,6 +12,7 @@ import Login from '../pages/login';
 import Analysis from '../pages/Analysis';
 import MainScreen from '../pages/main_screen';
 import Goals from '../pages/goals';
+import Ia from '../pages/IA';
 
 // IMPORTANTE: Nome da variável de importação DEVE começar com letra Maiúscula
 import PrincpTransitionScreen from '../pages/princp_transition_Screen';
@@ -105,7 +106,7 @@ function BottomTabs() {
 
       <Tab.Screen
         name="IA"
-        component={MainScreen}
+        component={Ia}
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
