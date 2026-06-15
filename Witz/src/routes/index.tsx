@@ -11,6 +11,7 @@ import Initial from '../pages/initial';
 import Login from '../pages/login';
 import Analysis from '../pages/Analysis';
 import MainScreen from '../pages/main_screen';
+import Goals from '../pages/goals';
 
 // IMPORTANTE: Nome da variável de importação DEVE começar com letra Maiúscula
 import PrincpTransitionScreen from '../pages/princp_transition_Screen';
@@ -90,7 +91,7 @@ function BottomTabs() {
 
       <Tab.Screen
         name="Metas"
-        component={MainScreen}
+        component={Goals}
         options={{
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
